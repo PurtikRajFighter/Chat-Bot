@@ -1,0 +1,170 @@
+.token-dashboard {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2d3748;
+}
+
+.token-balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.token-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.token-icon { font-size: 1rem; }
+.token-count { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
+.token-text { font-size: 0.8rem; color: #718096; }
+
+.buy-btn {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.token-bar-bg {
+  height: 4px;
+  background: #2d3748;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.token-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+.packages {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2d3748;
+}
+
+.packages-title {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.package-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: #0f1117;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #e2e8f0;
+}
+
+.package-card:hover:not(:disabled) {
+  border-color: #48bb78;
+  transform: translateY(-1px);
+}
+
+.package-card.popular {
+  border-color: #667eea;
+}
+
+.popular-badge {
+  position: absolute;
+  top: -8px;
+  font-size: 0.6rem;
+  background: #667eea;
+  color: white;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.pkg-amount { font-size: 1rem; font-weight: 700; color: #48bb78; }
+.pkg-tokens { font-size: 0.7rem; color: #718096; }
+
+/* ---- Sale / Discount styles ---- */
+
+.sale-banner {
+  margin-bottom: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  background: linear-gradient(90deg, #f6ad55, #fc8181);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1a202c;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.sale-badge {
+  position: absolute;
+  top: -8px;
+  font-size: 0.6rem;
+  background: linear-gradient(90deg, #f6ad55, #fc8181);
+  color: #1a202c;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Card glows orange when on sale */
+.package-card.on-sale {
+  border-color: #f6ad55;
+  box-shadow: 0 0 8px rgba(246, 173, 85, 0.25);
+}
+
+.package-card.on-sale:hover:not(:disabled) {
+  border-color: #fc8181;
+  box-shadow: 0 0 12px rgba(252, 129, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Token count layout during a sale */
+.pkg-tokens-sale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+/* Crossed-out original token count */
+.pkg-tokens-original {
+  font-size: 0.65rem;
+  color: #718096;
+  text-decoration: line-through;
+}
+
+/* New (higher) token count in bright colour */
+.pkg-tokens-new {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f6ad55;
+}
+
+/* "+N free" text below the token count */
+.pkg-bonus-detail {
+  font-size: 0.6rem;
+  color: #fc8181;
+  font-weight: 600;
+}
+
+.test-mode-note {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #718096;
+  text-align: center;
+}
+

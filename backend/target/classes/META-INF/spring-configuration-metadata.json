@@ -1,0 +1,47 @@
+{
+  "groups": [
+    {
+      "name": "payment",
+      "type": "com.chatbot.config.PackageConfig",
+      "sourceType": "com.chatbot.config.PackageConfig"
+    },
+    {
+      "name": "payment.discount",
+      "type": "com.chatbot.config.DiscountConfig",
+      "sourceType": "com.chatbot.config.DiscountConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "payment.discount.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.chatbot.config.DiscountConfig",
+      "defaultValue": false
+    },
+    {
+      "name": "payment.discount.global-bonus-percent",
+      "type": "java.lang.Integer",
+      "sourceType": "com.chatbot.config.DiscountConfig",
+      "defaultValue": 0
+    },
+    {
+      "name": "payment.discount.label",
+      "type": "java.lang.String",
+      "sourceType": "com.chatbot.config.DiscountConfig",
+      "defaultValue": "Sale"
+    },
+    {
+      "name": "payment.discount.package-extras",
+      "type": "java.util.List<com.chatbot.config.DiscountConfig$PackageExtra>",
+      "description": "Bound from payment.discount.packageExtras[N].extra Index N must match payment.packages[N] in PackageConfig.",
+      "sourceType": "com.chatbot.config.DiscountConfig"
+    },
+    {
+      "name": "payment.packages",
+      "type": "java.util.List<com.chatbot.config.PackageConfig$PackageItem>",
+      "description": "Bound from payment.packages[N].* in application.properties",
+      "sourceType": "com.chatbot.config.PackageConfig"
+    }
+  ],
+  "hints": []
+}

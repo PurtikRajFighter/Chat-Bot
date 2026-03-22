@@ -1,0 +1,47 @@
+.mode-selector {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2d3748;
+}
+
+.mode-label {
+  font-size: 0.7rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0.25rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: #0f1117;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #718096;
+}
+
+.mode-btn:hover {
+  border-color: var(--mode-color);
+  color: var(--mode-color);
+}
+
+.mode-btn.active {
+  border-color: var(--mode-color);
+  background: color-mix(in srgb, var(--mode-color) 15%, transparent);
+  color: var(--mode-color);
+}
+
+.mode-emoji { font-size: 1.1rem; }
+.mode-name { font-size: 0.7rem; font-weight: 500; }
+

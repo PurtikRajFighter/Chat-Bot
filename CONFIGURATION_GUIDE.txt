@@ -1,0 +1,545 @@
+================================================================================
+                   AI CHATBOT — CONFIGURATION GUIDE
+        Every setting you can change, what it does, and where it lives
+================================================================================
+
+ALL configuration for this app lives in ONE file:
+  backend/src/main/resources/application.properties
+
+Open that file in any text editor to make changes.
+After any change: STOP the backend (Ctrl+C) and restart it (mvn spring-boot:run).
+
+This guide explains EVERY setting grouped by feature.
+
+================================================================================
+1. TOKEN SYSTEM
+   (How many chat credits users get and how they are managed)
+================================================================================
+
+  SETTING                         DEFAULT   WHAT IT DOES
+  ------------------------------  -------   -------------------------------------------
+  tokens.default.count            10        Tokens given to a brand-new user at signup.
+                                            Increase this to be more generous at signup.
+
+  tokens.cost.per.message         1         Tokens deducted each time a user sends a
+                                            message. Set to 0 to make chat free.
+                                            Set to 2 or more to make it more expensive.
+
+  tokens.reset.interval.hours     24        How many hours must pass before a user's
+                                            tokens are automatically reset (free refill).
+                                            24 = daily reset, 12 = twice daily,
+                                            168 = weekly, 1 = every hour (testing).
+
+  tokens.reset.amount             10        How many tokens are given on each reset.
+                                            This is the "free daily allowance".
+                                            Make it equal to tokens.default.count or
+                                            set it higher to reward returning users.
+
+  EXAMPLE — Give users 25 free tokens daily, each message costs 2:
+  ----------------------------------------------------------------
+    tokens.default.count=25
+    tokens.cost.per.message=2
+    tokens.reset.interval.hours=24
+    tokens.reset.amount=25
+
+  EXAMPLE — Unlimited free chat (no token cost):
+  -----------------------------------------------
+    tokens.cost.per.message=0
+
+
+================================================================================
+2. PAYMENT / TOKEN PACKAGES
+   (Define as many packages as you want — add/remove without touching code)
+================================================================================
+
+  All packages live in application.properties under payment.packages[N].
+  The frontend reads them from the backend on every page load — there is
+  nothing to edit in the frontend code, ever.
+
+  EACH PACKAGE HAS 4 FIELDS:
+  --------------------------
+  payment.packages[N].amount      Price in rupees that the user pays (integer)
+  payment.packages[N].label       Text shown on the card  (e.g. "Rs.25")
+  payment.packages[N].baseTokens  Tokens given at the normal price
+  payment.packages[N].popular     true = shows a "Popular" badge (one at a time)
+
+  N starts at 0 and must be consecutive (0, 1, 2, 3 …).
+
+  DEFAULT PACKAGES:
+  -----------------
+    payment.packages[0].amount=10
+    payment.packages[0].label=Rs.10
+    payment.packages[0].baseTokens=100
+    payment.packages[0].popular=false
+
+    payment.packages[1].amount=25
+    payment.packages[1].label=Rs.25
+    payment.packages[1].baseTokens=250
+    payment.packages[1].popular=true
+
+    payment.packages[2].amount=50
+    payment.packages[2].label=Rs.50
+    payment.packages[2].baseTokens=500
+    payment.packages[2].popular=false
+
+  HOW TO ADD A NEW PACKAGE:
+  -------------------------
+    1. Open application.properties
+    2. Copy the 4-line block of the last package
+    3. Increment N by 1
+    4. Fill in your values
+    5. If this is now the best-value package, set popular=true (set others to false)
+    6. Optionally add a discount line for it (see Section 2.5)
+    7. Restart the backend — the new package appears in the UI automatically
+
+    Example — adding a Rs.100 "Mega Pack":
+      payment.packages[3].amount=100
+      payment.packages[3].label=Rs.100
+      payment.packages[3].baseTokens=1100
+      payment.packages[3].popular=false
+
+    And optionally a discount extra for it:
+      payment.discount.packageExtras[3].extra=300
+
+  HOW TO REMOVE A PACKAGE:
+  -------------------------
+    1. Delete the 4 lines for that package (and its discount line if any)
+    2. Renumber the remaining packages so N is still consecutive starting at 0
+    3. Restart the backend
+
+  HOW TO CHANGE A PRICE OR TOKEN COUNT:
+  --------------------------------------
+    Just edit the amount or baseTokens value and restart.
+    The frontend always shows whatever the backend returns.
+
+  HOW TO REORDER PACKAGES:
+  -------------------------
+    Change the [N] numbers to put them in the order you want.
+    Keep them 0-based and consecutive. Restart the backend.
+
+  HOW TO MARK A PACKAGE "POPULAR":
+  ---------------------------------
+    Set popular=true on one package, popular=false on all others.
+    Only one should be true — having multiple shows multiple badges.
+
+
+================================================================================
+2.5 DISCOUNTS & SALES
+    (Give users bonus tokens during special offers — no code changes needed)
+================================================================================
+
+  The discount system lets you run a sale entirely from application.properties.
+  The PRICE users pay NEVER changes — they simply get MORE tokens for the same
+  money. The UI automatically shows a sale banner, crossed-out old counts, and
+  new counts when a sale is active.
+
+  HOW IT WORKS:
+  -------------
+  There are two layers of bonus you can stack:
+
+    Layer 1 — Global % bonus:
+      Applied to ALL packages equally.
+      e.g., 20% bonus on Rs.10 package (base=100) → user gets 120 tokens.
+
+    Layer 2 — Per-package extra tokens:
+      Added on top of Layer 1 for individual packages.
+      Use this to make the larger packages more attractive.
+      e.g., Rs.50 package gets 150 extra → total = 500 + 100(20%) + 150 = 750.
+
+  SETTINGS (all in application.properties):
+  ------------------------------------------
+
+  SETTING                                  DEFAULT   WHAT IT DOES
+  ---------------------------------------  -------   --------------------------------
+  payment.discount.enabled                 false     Master switch. true = sale ON.
+  payment.discount.label                   Sale      Badge text shown in the UI.
+                                                     Examples: "Diwali Sale",
+                                                     "Weekend Offer", "Flash Deal"
+  payment.discount.global.bonus.percent    20        Extra % tokens for ALL packages.
+                                                     Set to 0 for no global bonus.
+  payment.discount.packageExtras[N].extra  0       Extra tokens for package [N].
+                                                     N must match payment.packages[N].
+                                                     Add a new line when you add a
+                                                     new package.
+
+  STEP-BY-STEP — HOW TO START A SALE:
+  ------------------------------------
+    STEP 1: Open application.properties
+    STEP 2: Set the label:           payment.discount.label=Diwali Sale
+    STEP 3: Set global bonus %:      payment.discount.global.bonus.percent=25
+    STEP 4: Set per-package extras:  payment.discount.packageExtras[0].extra=0
+                                     payment.discount.packageExtras[1].extra=75
+                                     payment.discount.packageExtras[2].extra=200
+    STEP 5: Turn it ON:              payment.discount.enabled=true
+    STEP 6: Restart backend:         Ctrl+C → mvn spring-boot:run
+    STEP 7: Open frontend → click "+ Buy" to see the sale UI.
+
+  STEP-BY-STEP — HOW TO END A SALE:
+  ------------------------------------
+    STEP 1: Set: payment.discount.enabled=false
+    STEP 2: Restart the backend.
+    Done — UI returns to normal base token counts.
+
+  WHEN YOU ADD A NEW PACKAGE, ALSO ADD ITS DISCOUNT LINE:
+  --------------------------------------------------------
+    # New package:
+    payment.packages[3].amount=100
+    payment.packages[3].label=Rs.100
+    payment.packages[3].baseTokens=1100
+    payment.packages[3].popular=false
+
+    # Its discount extra (even if 0 — keeps things explicit):
+    payment.discount.packageExtras[3].extra=300
+
+  WHAT USERS SEE DURING A SALE:
+  ------------------------------
+    - An orange "🔥 Diwali Sale — 25% Extra Tokens!" banner
+    - Each package card has an orange "🔥 Diwali Sale" badge
+    - Old token count crossed out, new (higher) count in orange
+    - "+N free" label shows exact bonus tokens
+    - Razorpay checkout still shows the original price (no actual discount)
+
+  EXAMPLES:
+  ---------
+
+  EXAMPLE A — 20% bonus on everything (Weekend Flash Sale):
+    payment.discount.enabled=true
+    payment.discount.label=Weekend Flash Sale
+    payment.discount.global.bonus.percent=20
+    payment.discount.packageExtras[0].extra=0
+    payment.discount.packageExtras[1].extra=0
+    payment.discount.packageExtras[2].extra=0
+    Result: Rs.10=120, Rs.25=300, Rs.50=600 tokens
+
+  EXAMPLE B — No global bonus, big-package bonus only:
+    payment.discount.enabled=true
+    payment.discount.label=Bulk Bonus
+    payment.discount.global.bonus.percent=0
+    payment.discount.packageExtras[0].extra=0
+    payment.discount.packageExtras[1].extra=50
+    payment.discount.packageExtras[2].extra=250
+    Result: Rs.10=100, Rs.25=300, Rs.50=750 tokens
+
+  EXAMPLE C — Stacked: 10% global + per-package extras (Diwali):
+    payment.discount.enabled=true
+    payment.discount.label=Diwali Offer
+    payment.discount.global.bonus.percent=10
+    payment.discount.packageExtras[0].extra=10
+    payment.discount.packageExtras[1].extra=75
+    payment.discount.packageExtras[2].extra=200
+    Result: Rs.10=120, Rs.25=350, Rs.50=750 tokens
+
+  IMPORTANT NOTES:
+  ----------------
+  - The PRICE (Rs.10, Rs.25, Rs.50) NEVER changes — only the token count does.
+  - Discount is applied SERVER-SIDE. Clients cannot cheat — the backend always
+    calculates the actual tokens regardless of what the frontend sends.
+  - The discount.enabled flag is the ONLY switch you need to flip.
+    All other settings stay saved and are ready for the next sale.
+  - You can change label/percent/extras while a sale is running —
+    just restart the backend to apply the updated values.
+
+
+================================================================================
+3. AI PROVIDER & MODEL
+   (Which AI the chatbot uses to generate responses)
+================================================================================
+
+  SETTING         DEFAULT                                    WHAT IT DOES
+  --------------- ------------------------------------------ --------------------
+  ai.provider     ollama                                     'ollama' or 'openai'
+  ai.api.url      http://localhost:11434/v1/chat/completions  API endpoint URL
+  ai.api.key      (empty)                                    API key (blank=Ollama)
+  ai.model        llama3.2                                   Model name to use
+
+  --- SWITCHING AI PROVIDER ---
+
+  TO USE OLLAMA (default, local, free):
+    ai.provider=ollama
+    ai.api.url=http://localhost:11434/v1/chat/completions
+    ai.api.key=
+    ai.model=llama3.2
+
+    Available Ollama models (run: ollama pull <model>):
+      llama3.2    — Balanced, recommended
+      llama3      — Larger, smarter, needs more RAM
+      mistral     — Good for creative writing
+      gemma2      — Google's model
+      phi3        — Small and fast
+      tinyllama   — Very small, runs on weak hardware
+
+  TO USE OPENAI (cloud, paid):
+    ai.provider=openai
+    ai.api.url=https://api.openai.com/v1/chat/completions
+    ai.api.key=sk-proj-your-key-here
+    ai.model=gpt-4o-mini
+
+    Available OpenAI models:
+      gpt-4o-mini   — Cheap, fast, great quality (RECOMMENDED for cost)
+      gpt-4o        — More powerful, costs more
+      gpt-3.5-turbo — Older, cheapest option
+
+  TO USE GROQ (cloud, free tier):
+    ai.provider=openai
+    ai.api.url=https://api.groq.com/openai/v1/chat/completions
+    ai.api.key=gsk_your-groq-key-here
+    ai.model=llama3-8b-8192
+
+  TO USE LM STUDIO (local GUI app, free):
+    ai.provider=ollama
+    ai.api.url=http://localhost:1234/v1/chat/completions
+    ai.api.key=lm-studio
+    ai.model=<model name shown in LM Studio>
+
+
+================================================================================
+4. CHAT MODES & AI PERSONALITY
+   (How each mode behaves — change the AI's personality)
+================================================================================
+
+  The chat modes define HOW the AI responds. Each mode has a "system prompt"
+  which is a set of instructions given to the AI at the start of every conversation.
+
+  WHERE TO CHANGE MODE SYSTEM PROMPTS:
+    File: backend/src/main/java/com/chatbot/service/ChatService.java
+    Method: getSystemPrompt(String mode)
+
+  The current modes and their personalities:
+
+  MODE         PERSONALITY
+  ----------   ---------------------------------------------------------------
+  NORMAL       Helpful general assistant. Answers questions, helps with tasks.
+  FANTASY      Storytelling and adventure narrator. Creates immersive stories.
+  COMPANION    Warm, empathetic, emotional support. Listens and cares.
+  FLIRT        Playful, charming, light romantic banter. Tasteful only.
+
+  HOW TO EDIT A SYSTEM PROMPT:
+  Find this block in ChatService.java:
+
+    case "FANTASY" -> """
+        You are a creative storyteller and fantasy narrator...
+        """;
+
+  Change the text between the triple quotes to anything you want.
+
+  HOW TO ADD A NEW MODE:
+  1. In ChatService.java, add a new case in getSystemPrompt():
+       case "THERAPIST" -> """
+           You are a certified virtual therapist...
+           """;
+
+  2. In frontend/src/components/ModeSelector.jsx, add the new mode to the list:
+       { value: 'THERAPIST', label: '🧠 Therapist', desc: 'Mental wellness chat' }
+
+
+================================================================================
+5. SCHEDULER (automatic free token resets)
+================================================================================
+
+  SETTING                         DEFAULT         WHAT IT DOES
+  ------------------------------  --------------  ----------------------------------
+  scheduler.token.reset.cron      0 0 * * * *     How often to CHECK for resets.
+  tokens.reset.interval.hours     24              How old the last reset must be.
+  tokens.reset.amount             10              How many tokens given on reset.
+
+  The scheduler runs in the background while the app is running.
+  Every time it runs, it checks ALL users in users.xlsx.
+  If a user's last_reset_time is older than tokens.reset.interval.hours,
+  their tokens are topped back up to tokens.reset.amount.
+
+  CRON FORMAT:  second  minute  hour  day-of-month  month  day-of-week
+  -----------------------------------------------------------------------
+  0 0 * * * *       Every hour at :00
+  0 */30 * * * *    Every 30 minutes
+  0 0 0 * * *       Once a day at midnight
+  0 0 8 * * *       Once a day at 8 AM
+  0 * * * * *       Every minute (for TESTING only)
+
+  EXAMPLE — Give 5 tokens every 30 minutes (good for demos/testing):
+    scheduler.token.reset.cron=0 */30 * * * *
+    tokens.reset.interval.hours=0
+    tokens.reset.amount=5
+
+  EXAMPLE — Weekly reset with 50 tokens:
+    scheduler.token.reset.cron=0 0 * * * *
+    tokens.reset.interval.hours=168
+    tokens.reset.amount=50
+
+
+================================================================================
+6. AUTHENTICATION & LOGIN SESSION
+================================================================================
+
+  SETTING                         DEFAULT                           WHAT IT DOES
+  ------------------------------  --------------------------------  ----------------------
+  jwt.secret                      chatbot-super-secret-key-...      Secret used to sign
+                                                                    login tokens. Change
+                                                                    this in production.
+  jwt.expiration.ms               86400000                          How long a login
+                                                                    session lasts (ms).
+
+  COMMON jwt.expiration.ms VALUES:
+    3600000    = 1 hour
+    86400000   = 24 hours  (default)
+    604800000  = 7 days
+    2592000000 = 30 days
+
+  IMPORTANT: If you change jwt.secret, all existing logged-in users will
+             be logged out and need to log in again (their old tokens become invalid).
+
+
+================================================================================
+7. FILE STORAGE PATHS
+================================================================================
+
+  SETTING                         DEFAULT                    WHAT IT DOES
+  ------------------------------  -------------------------  -----------------------
+  excel.users.path                ../data/users.xlsx         Where users are stored
+  excel.transactions.path         ../data/transactions.xlsx  Payment records
+  excel.chats.path                ../data/chats.xlsx         Chat history
+
+  These paths are relative to the backend/ folder.
+  "../data/" means "go up one level from backend/, then into data/".
+
+  CHANGING PATHS — only do this if you need to store data elsewhere:
+    excel.users.path=/Users/yourname/Documents/chatbot/users.xlsx
+
+  DO NOT change these during normal use.
+  Files are auto-created on first startup.
+
+
+================================================================================
+8. RAZORPAY (payment gateway)
+================================================================================
+
+  SETTING                         DEFAULT              WHAT IT DOES
+  ------------------------------  -------------------  --------------------------
+  razorpay.key.id                 rzp_test_XXXXXXX     Your Razorpay Key ID
+  razorpay.key.secret             XXXXXXXXXXXXXXXXX    Your Razorpay Key Secret
+  payment.tokens.per.rupee        10                   Tokens added per ₹1 paid
+
+  See API_KEYS_GUIDE.txt → Section 2 for step-by-step key generation.
+
+  TO SWITCH FROM TEST TO LIVE MODE:
+    - In Razorpay Dashboard, switch the toggle to LIVE
+    - Generate a new Live key (starts with rzp_live_)
+    - Replace rzp_test_... with rzp_live_... in application.properties
+    - Replace the live secret too
+    WARNING: Live mode charges real money. Test thoroughly before switching.
+
+
+================================================================================
+9. SERVER PORT
+================================================================================
+
+  SETTING         DEFAULT   WHAT IT DOES
+  --------------- -------   -------------------------------------------------
+  server.port     8080      Which port the backend API runs on.
+
+  If port 8080 is taken by another app on your system, change to e.g. 8081:
+    server.port=8081
+
+  If you change this, also update the frontend API base URL in:
+    frontend/src/api/axios.js
+  Change:   baseURL: 'http://localhost:8080/api'
+  To:       baseURL: 'http://localhost:8081/api'
+
+
+================================================================================
+10. QUICK REFERENCE — ALL SETTINGS IN ONE PLACE
+================================================================================
+
+  # backend/src/main/resources/application.properties
+
+  server.port=8080
+  spring.web.cors.allowed-origins=http://localhost:3000
+
+  excel.users.path=../data/users.xlsx
+  excel.transactions.path=../data/transactions.xlsx
+  excel.chats.path=../data/chats.xlsx
+
+  jwt.secret=<random-long-string>
+  jwt.expiration.ms=86400000            # 24 hours login session
+
+  tokens.default.count=10              # tokens at signup
+  tokens.cost.per.message=1            # tokens per message
+  tokens.reset.interval.hours=24       # hours between resets
+  tokens.reset.amount=10               # tokens given on reset
+
+  ai.provider=ollama
+  ai.api.url=http://localhost:11434/v1/chat/completions
+  ai.api.key=                          # blank for Ollama
+  ai.model=llama3.2
+
+  razorpay.key.id=rzp_test_...
+  razorpay.key.secret=...
+  payment.tokens.per.rupee=10          # tokens per rupee paid
+
+  # Discounts / Sales (flip enabled=true to start a sale)
+  payment.discount.enabled=false
+  payment.discount.label=Sale
+  payment.discount.global.bonus.percent=20
+  payment.discount.package1.extra.tokens=0
+  payment.discount.package2.extra.tokens=50
+  payment.discount.package3.extra.tokens=150
+
+  scheduler.token.reset.cron=0 0 * * * *   # check every hour
+
+
+================================================================================
+11. COMMON CUSTOMIZATION SCENARIOS
+================================================================================
+
+  SCENARIO A — "I want to test everything quickly"
+  ................................................
+    tokens.default.count=100
+    tokens.cost.per.message=1
+    tokens.reset.interval.hours=1
+    tokens.reset.amount=100
+    scheduler.token.reset.cron=0 * * * * *   ← check every minute
+
+  SCENARIO B — "I want strict limits — users must pay"
+  .....................................................
+    tokens.default.count=5
+    tokens.cost.per.message=1
+    tokens.reset.interval.hours=72            ← reset every 3 days
+    tokens.reset.amount=3
+
+  SCENARIO C — "I want completely free unlimited chat"
+  .....................................................
+    tokens.cost.per.message=0                 ← no deduction
+
+  SCENARIO D — "I want to use OpenAI gpt-4o instead of Ollama"
+  ..............................................................
+    ai.provider=openai
+    ai.api.url=https://api.openai.com/v1/chat/completions
+    ai.api.key=sk-proj-your-key-here
+    ai.model=gpt-4o
+
+  SCENARIO E — "I want longer login sessions (stay logged in 7 days)"
+  ....................................................................
+    jwt.expiration.ms=604800000
+
+  SCENARIO F — "I want to run a quick 20% weekend sale"
+  ......................................................
+    payment.discount.enabled=true
+    payment.discount.label=Weekend Sale
+    payment.discount.global.bonus.percent=20
+    payment.discount.package1.extra.tokens=0
+    payment.discount.package2.extra.tokens=0
+    payment.discount.package3.extra.tokens=0
+    → ₹10=120 tokens, ₹25=300 tokens, ₹50=600 tokens
+    To end it: payment.discount.enabled=false  then restart.
+
+  SCENARIO G — "I want to push users toward the ₹50 package (big bonus there)"
+  ..............................................................................
+    payment.discount.enabled=true
+    payment.discount.label=Best Value
+    payment.discount.global.bonus.percent=0
+    payment.discount.package1.extra.tokens=0
+    payment.discount.package2.extra.tokens=0
+    payment.discount.package3.extra.tokens=300
+    → ₹10=100, ₹25=250, ₹50=800 tokens (only the big pack gets a bonus)
+
+================================================================================
+

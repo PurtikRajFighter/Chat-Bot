@@ -1,0 +1,377 @@
+================================================================================
+                      AI CHATBOT — API KEYS SETUP GUIDE
+          Where to get each key, step-by-step, with screenshots description
+================================================================================
+
+This file explains where to get every external key or credential this app uses,
+and exactly where to paste each one.
+
+All keys go into ONE file:
+  backend/src/main/resources/application.properties
+
+================================================================================
+SECTION 1 — OLLAMA (DEFAULT — LOCAL AI, COMPLETELY FREE, NO KEY NEEDED)
+================================================================================
+
+Ollama runs an AI model directly on your computer.
+No account needed. No API key. No internet needed after setup.
+This is the DEFAULT AI provider for this app.
+
+STEP-BY-STEP SETUP:
+----------------------------------------------------------------------
+
+  STEP 1 — Install Ollama
+  .......................
+  Go to: https://ollama.ai
+
+  - macOS:
+      Download the .dmg file from the website.
+      Open it, drag Ollama to Applications.
+      Launch Ollama from Applications or Spotlight.
+      You will see an Ollama icon appear in your macOS menu bar (top right).
+
+  - Linux:
+      Open a terminal and run:
+        curl -fsSL https://ollama.ai/install.sh | sh
+
+  - Windows:
+      Download the .exe installer from https://ollama.ai/download/windows
+      Run it. Ollama will install as a background service.
+
+  STEP 2 — Start Ollama server
+  ............................
+  Open a terminal and run:
+    ollama serve
+
+  Leave this terminal open and running in the background.
+  You should see: "Listening on 127.0.0.1:11434"
+
+  NOTE: On macOS, if you launched the app from Applications,
+        ollama serve starts automatically — you don't need to run it manually.
+
+  STEP 3 — Download an AI model (first time only)
+  ...............................................
+  Open a NEW terminal (keep the serve terminal open) and run:
+    ollama pull llama3.2
+
+  This downloads the model (~2 GB). Only needed once.
+  After that, the model is stored locally and works offline.
+
+  Other available models (choose based on your machine's RAM):
+    ollama pull llama3.2        ← RECOMMENDED (4GB RAM minimum)
+    ollama pull llama3           ← Larger, smarter (8GB RAM recommended)
+    ollama pull mistral          ← Good alternative (8GB RAM)
+    ollama pull gemma2           ← Google model (8GB RAM)
+    ollama pull phi3             ← Small, fast model (4GB RAM)
+    ollama pull tinyllama        ← Tiny, runs on very old machines (2GB RAM)
+
+  Browse all models at: https://ollama.ai/library
+
+  STEP 4 — Verify it works
+  ........................
+  Open your browser and go to:
+    http://localhost:11434
+
+  You should see: "Ollama is running"
+
+  STEP 5 — Application config (already set by default)
+  .....................................................
+  In application.properties these lines are already correct:
+
+    ai.provider=ollama
+    ai.api.url=http://localhost:11434/v1/chat/completions
+    ai.api.key=
+    ai.model=llama3.2
+
+  NO CHANGES NEEDED if you are using Ollama.
+
+TROUBLESHOOTING OLLAMA:
+----------------------------------------------------------------------
+  Problem: "connection refused" when chatting
+  Fix: Make sure "ollama serve" is running in a terminal.
+
+  Problem: Model is very slow
+  Fix: Try a smaller model: ollama pull phi3  or  ollama pull tinyllama
+
+  Problem: "model not found"
+  Fix: Run: ollama pull llama3.2  (make sure spelling matches ai.model=)
+
+  Problem: High RAM usage
+  Fix: Ollama loads the model into RAM. Close other apps.
+       Or use a smaller model (tinyllama uses ~1GB RAM).
+
+
+================================================================================
+SECTION 2 — RAZORPAY (PAYMENT GATEWAY — TEST MODE IS FREE)
+================================================================================
+
+Razorpay is the payment gateway used to buy more chat tokens.
+You need a Razorpay account to get API keys — but TEST MODE is 100% free
+and no real money is charged.
+
+  IMPORTANT: You need an Indian phone number for registration.
+  Razorpay primarily serves Indian businesses.
+  If you are outside India, see the NOTE at the end of this section.
+
+STEP-BY-STEP TO GET RAZORPAY TEST KEYS:
+----------------------------------------------------------------------
+
+  STEP 1 — Create a Razorpay Account
+  ...................................
+  Go to: https://dashboard.razorpay.com/signup
+
+  Fill in:
+    - Full Name
+    - Business Email (or personal email)
+    - Phone number (Indian number required)
+    - Password
+  Click "Create account".
+
+  Verify your email by clicking the link sent to your inbox.
+
+  STEP 2 — Complete Basic Profile (skip business details for testing)
+  ...................................................................
+  After login, Razorpay may ask for business details.
+  You can skip most of this — for TEST MODE keys, no verification is needed.
+  Just look for the "Skip" or "Continue later" option.
+
+  STEP 3 — Go to API Keys section
+  ................................
+  In the Razorpay Dashboard:
+    - Look at the LEFT SIDEBAR
+    - Scroll down to find "Settings" (gear icon)
+    - Click "Settings"
+    - Click "API Keys" tab at the top
+
+  OR navigate directly to:
+    https://dashboard.razorpay.com/app/keys
+
+  STEP 4 — Switch to TEST MODE
+  ............................
+  VERY IMPORTANT: Look at the TOP LEFT of the dashboard.
+  There is a toggle switch that says "Test Mode" / "Live Mode".
+  Make sure it shows "TEST MODE" (it should be ON by default for new accounts).
+
+  In Test Mode:
+    - No real money is involved
+    - Use fake card numbers (listed below)
+    - Keys start with "rzp_test_"
+
+  STEP 5 — Generate Test API Keys
+  ................................
+  On the API Keys page:
+    - Click the button "Generate Test Key" (or "Regenerate Test Key")
+    - A popup will appear showing:
+        Key ID:     rzp_test_XXXXXXXXXXXX   ← this is your Key ID
+        Key Secret: XXXXXXXXXXXXXXXXXX      ← this is your Secret (shown ONCE)
+
+  IMPORTANT: Copy the Key Secret immediately and save it somewhere safe.
+             It is only shown ONCE. If you miss it, regenerate a new key.
+
+  STEP 6 — Paste keys into application.properties
+  ...............................................
+  Open: backend/src/main/resources/application.properties
+
+  Replace these placeholder lines:
+    razorpay.key.id=rzp_test_XXXXXXXXXX
+    razorpay.key.secret=XXXXXXXXXXXXXXXXXX
+
+  With your actual keys:
+    razorpay.key.id=rzp_test_AbCdEfGhIj1234
+    razorpay.key.secret=abcdefghijklmnopqrstuvwx
+
+  STEP 7 — Restart the backend
+  ............................
+  Stop the backend (Ctrl+C) and start it again for keys to take effect.
+
+TEST PAYMENT CARD DETAILS (for testing purchases):
+----------------------------------------------------------------------
+  When the Razorpay checkout popup appears during testing, use:
+
+  Card Number : 4111 1111 1111 1111
+  Expiry      : Any future date  (e.g., 12/30)
+  CVV         : Any 3 digits     (e.g., 123)
+  OTP / PIN   : 1234             (if prompted)
+
+  OR use this Netbanking test:
+    Bank: Select any test bank shown in the list
+    Use any dummy credentials shown
+
+  NO REAL MONEY IS CHARGED IN TEST MODE.
+
+NOTE FOR USERS OUTSIDE INDIA:
+----------------------------------------------------------------------
+  Razorpay requires Indian phone verification for full account setup.
+  If you are outside India, alternatives are:
+
+  1. Stripe (international):
+     - Create account at https://stripe.com
+     - The code would need small modifications to use Stripe SDK
+     - For now, payment features won't work without India phone number
+
+  2. Skip payments entirely:
+     - The app works fine without Razorpay
+     - Users just get free tokens via scheduler reset
+     - Payment buttons will show an error, but chat still works
+
+  3. Use a friend's Indian number for OTP verification
+
+
+================================================================================
+SECTION 3 — OPENAI (OPTIONAL — CLOUD AI, PAID, NOT NEEDED IF USING OLLAMA)
+================================================================================
+
+OpenAI provides cloud-based AI (ChatGPT, GPT-4, etc.).
+ONLY needed if you want to use OpenAI instead of local Ollama.
+OpenAI charges money per API call.
+
+STEP-BY-STEP TO GET OPENAI API KEY:
+----------------------------------------------------------------------
+
+  STEP 1 — Create OpenAI Account
+  ..............................
+  Go to: https://platform.openai.com/signup
+
+  Sign up with:
+    - Email + password, OR
+    - Google / Microsoft account
+
+  Verify your phone number (required for API access).
+
+  STEP 2 — Add Payment Method
+  ...........................
+  OpenAI requires a credit/debit card before you can use the API.
+  Go to: https://platform.openai.com/account/billing
+
+  Click "Add payment method" and enter your card details.
+
+  NEW ACCOUNTS get $5 free credit — enough to test extensively.
+  After that, charges are very small (fractions of a cent per message).
+
+  Cost estimate for this chatbot:
+    gpt-4o-mini: ~$0.00015 per message (very cheap)
+    gpt-4o:      ~$0.005 per message (moderate)
+
+  STEP 3 — Generate an API Key
+  ............................
+  Go to: https://platform.openai.com/api-keys
+  OR: platform.openai.com → click your profile icon → "API Keys"
+
+  Click "Create new secret key"
+  Give it a name (e.g., "ChatBot Local")
+  Click "Create secret key"
+
+  Your key looks like:   sk-proj-ABCDEFGHIJKLMNOPabcdefghijklmnop...
+
+  COPY IT IMMEDIATELY — it is only shown once.
+
+  STEP 4 — Paste into application.properties
+  ..........................................
+  Open: backend/src/main/resources/application.properties
+
+  Comment out the Ollama block and uncomment the OpenAI block:
+
+    # Comment out Ollama (add # at start of each line):
+    # ai.provider=ollama
+    # ai.api.url=http://localhost:11434/v1/chat/completions
+    # ai.api.key=
+    # ai.model=llama3.2
+
+    # Uncomment and fill in OpenAI:
+    ai.provider=openai
+    ai.api.url=https://api.openai.com/v1/chat/completions
+    ai.api.key=sk-proj-your-actual-key-here
+    ai.model=gpt-4o-mini
+
+  STEP 5 — Restart backend
+  ........................
+  Stop and restart: mvn spring-boot:run
+
+
+================================================================================
+SECTION 4 — GROQ (OPTIONAL — FREE CLOUD AI, VERY FAST)
+================================================================================
+
+Groq offers free cloud AI inference — it runs Llama3, Mistral, etc.
+on special hardware. Very fast, has a generous free tier.
+Good middle ground: free like Ollama, no local install needed.
+
+STEP-BY-STEP TO GET GROQ API KEY:
+----------------------------------------------------------------------
+
+  STEP 1 — Create Groq Account
+  ............................
+  Go to: https://console.groq.com
+
+  Click "Sign up" — use Google or GitHub or email.
+  No credit card needed for the free tier.
+
+  STEP 2 — Get API Key
+  ....................
+  After login, go to: https://console.groq.com/keys
+
+  Click "Create API Key"
+  Name it anything (e.g., "chatbot")
+  Click "Submit"
+
+  Your key looks like:   gsk_ABCDEFGHijklmnopQRSTUVWX...
+
+  Copy it immediately.
+
+  STEP 3 — Paste into application.properties
+  ..........................................
+    ai.provider=openai
+    ai.api.url=https://api.groq.com/openai/v1/chat/completions
+    ai.api.key=gsk_your-groq-key-here
+    ai.model=llama3-8b-8192
+
+  Available Groq models (free tier):
+    llama3-8b-8192     ← fast, good quality
+    llama3-70b-8192    ← slower, better quality
+    mixtral-8x7b-32768 ← long context
+
+  STEP 4 — Restart backend
+  ........................
+  Stop and restart: mvn spring-boot:run
+
+  Free tier limits: ~14,400 requests/day — more than enough for personal use.
+
+
+================================================================================
+SECTION 5 — SUMMARY TABLE
+================================================================================
+
+  Provider   Free?    Key needed?   Internet?   Setup time   Where to get key
+  ---------  -------  ------------  ----------  -----------  -------------------------
+  Ollama     YES      NO            NO (local)  10 minutes   https://ollama.ai
+  Groq       YES      YES           YES         5 minutes    https://console.groq.com
+  OpenAI     NO       YES           YES         10 minutes   https://platform.openai.com
+  Razorpay   TEST=YES YES           YES         10 minutes   https://dashboard.razorpay.com
+
+
+================================================================================
+SECTION 6 — WHERE EXACTLY TO PASTE EACH KEY
+================================================================================
+
+  FILE: backend/src/main/resources/application.properties
+
+  +---------------------------+----------------------------------------------+
+  | What you are pasting      | Which line in application.properties         |
+  +---------------------------+----------------------------------------------+
+  | Razorpay Key ID           | razorpay.key.id=rzp_test_...                 |
+  | Razorpay Key Secret       | razorpay.key.secret=...                      |
+  | OpenAI API key            | ai.api.key=sk-proj-...                       |
+  | Groq API key              | ai.api.key=gsk_...                           |
+  | Ollama (no key needed)    | ai.api.key=    ← leave blank                 |
+  | Ollama model name         | ai.model=llama3.2                            |
+  | OpenAI model name         | ai.model=gpt-4o-mini                         |
+  | AI endpoint URL (Ollama)  | ai.api.url=http://localhost:11434/v1/...     |
+  | AI endpoint URL (OpenAI)  | ai.api.url=https://api.openai.com/v1/...     |
+  | AI endpoint URL (Groq)    | ai.api.url=https://api.groq.com/openai/v1/...|
+  +---------------------------+----------------------------------------------+
+
+  After editing application.properties, ALWAYS restart the backend:
+    Ctrl+C to stop → mvn spring-boot:run to start again
+
+================================================================================
+
